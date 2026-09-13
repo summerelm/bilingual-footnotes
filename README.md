@@ -3,6 +3,9 @@
 Create bilingual reading EPUBs with linked translation notes, or align two
 parallel text files. Processing runs locally.
 
+Visit [bilingual-footnotes.elmypath.com](https://bilingual-footnotes.elmypath.com/)
+for an overview and downloads.
+
 ## Choose a workflow
 
 | Need | Guide | Command |
@@ -15,13 +18,13 @@ Both workflows require corresponding texts in the same reading order.
 
 ## Use the desktop app
 
-For the simplest workflow, download the archive for your computer from the
+For the simplest workflow, download the installer for your computer from the
 [latest release](https://github.com/summerelm/bilingual-footnotes/releases/latest):
 
-- **Windows x64:** extract the archive and open `Bilingual Footnotes.exe`.
-- **Mac with Apple silicon:** extract the `macOS-arm64` archive, move
-  **Bilingual Footnotes.app** to Applications, and open it.
-- **Mac with an Intel processor:** use the `macOS-x86_64` archive instead.
+- **Windows x64:** run the `Windows-x86_64.exe` installer.
+- **Mac with Apple silicon:** open the `macOS-arm64.dmg`, then drag
+  **Bilingual Footnotes** to Applications.
+- **Mac with an Intel processor:** use the `macOS-x86_64.dmg` instead.
 
 Choose the EPUB you want to read, its translation, and a new output filename.
 The app includes the alignment worker; use **Model & storage…** to install the

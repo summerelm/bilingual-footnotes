@@ -12,7 +12,6 @@ import shutil
 import subprocess
 import sys
 import tomllib
-import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -119,6 +118,7 @@ def copy_worker(app: Path, worker: Path) -> tuple[Path, Path]:
         executable = destination / f"{WORKER_NAME}.exe"
         app_executable = app / f"{APP_NAME}.exe"
     shutil.copytree(worker, destination)
+    shutil.rmtree(worker)
     return app_executable, executable
 
 
@@ -135,7 +135,7 @@ def copy_licenses(app: Path) -> None:
             is_license = "licenses" in parts or filename.startswith(
                 ("license", "copying", "notice")
             )
-            source = installed_file.locate()
+            source = Path(installed_file.locate())
             if is_license and source.is_file():
                 target = destination / f"{name}-{installed_file.name}"
                 if not target.exists():
@@ -174,19 +174,83 @@ def verify(app_executable: Path, worker_executable: Path, version: str) -> None:
     )
 
 
-def archive(app: Path, output: Path) -> None:
+def create_macos_dmg(app: Path, output: Path) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
-    if sys.platform == "darwin":
-        run("ditto", "-c", "-k", "--sequesterRsrc", "--keepParent", str(app), str(output))
-        return
-    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED) as destination:
-        for path in app.rglob("*"):
-            if path.is_file():
-                destination.write(path, path.relative_to(app.parent))
+    staging = app.parent
+    (staging / "Applications").symlink_to("/Applications")
+    run(
+        "hdiutil",
+        "create",
+        "-volname",
+        APP_NAME,
+        "-srcfolder",
+        str(staging),
+        "-format",
+        "UDZO",
+        "-ov",
+        str(output),
+    )
+    run("hdiutil", "verify", str(output))
+
+
+def find_inno_compiler() -> Path:
+    if compiler_path := shutil.which("iscc"):
+        return Path(compiler_path)
+    program_files = os.environ.get("PROGRAMFILES(X86)")
+    if program_files:
+        candidate = Path(program_files) / "Inno Setup 6/ISCC.exe"
+        if candidate.is_file():
+            return candidate
+    raise RuntimeError("Inno Setup 6 compiler (ISCC.exe) was not found")
+
+
+def create_windows_installer(app: Path, icon: Path, output: Path, version: str) -> None:
+    output.parent.mkdir(parents=True, exist_ok=True)
+    script = app.parent / "BilingualFootnotes.iss"
+    source = str(app).replace('"', '""')
+    destination = str(output.parent).replace('"', '""')
+    setup_icon = str(icon).replace('"', '""')
+    script.write_text(
+        f"""[Setup]
+AppId=io.github.summerelm.bilingual-footnotes
+AppName={APP_NAME}
+AppVersion={version}
+AppPublisher=summerelm
+AppPublisherURL=https://bilingual-footnotes.elmypath.com/
+AppSupportURL=https://github.com/summerelm/bilingual-footnotes/issues
+DefaultDirName={{localappdata}}\\Programs\\{APP_NAME}
+DefaultGroupName={APP_NAME}
+DisableProgramGroupPage=yes
+OutputDir={destination}
+OutputBaseFilename={output.stem}
+SetupIconFile={setup_icon}
+UninstallDisplayIcon={{app}}\\{APP_NAME}.exe
+Compression=lzma2
+SolidCompression=yes
+WizardStyle=modern
+PrivilegesRequired=lowest
+ArchitecturesAllowed=x64compatible
+ArchitecturesInstallIn64BitMode=x64compatible
+
+[Files]
+Source: "{source}\\*"; DestDir: "{{app}}"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+[Icons]
+Name: "{{autoprograms}}\\{APP_NAME}"; Filename: "{{app}}\\{APP_NAME}.exe"
+
+[Run]
+Filename: "{{app}}\\{APP_NAME}.exe"; Description: "Launch {APP_NAME}"; Flags: nowait postinstall skipifsilent
+""",
+        encoding="utf-8",
+    )
+    run(str(find_inno_compiler()), "/Qp", str(script))
+    if not output.is_file():
+        raise RuntimeError(f"Inno Setup did not create {output}")
 
 
 def write_checksum(path: Path) -> None:
-    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    with path.open("rb") as source:
+        digest = hashlib.file_digest(source, "sha256").hexdigest()
     line = f"{digest}  {path.name}\n".encode("ascii")
     path.with_suffix(path.suffix + ".sha256").write_bytes(line)
 
@@ -231,12 +295,15 @@ def main() -> None:
         sign_macos_bundle(app)
     verify(app_executable, worker_executable, version)
 
-    operating_system = "macOS" if sys.platform == "darwin" else "Windows"
-    output = (
-        arguments.output_dir.resolve()
-        / f"Bilingual-Footnotes-{version}-{operating_system}-{arguments.architecture}.zip"
-    )
-    archive(app, output)
+    output_dir = arguments.output_dir.resolve()
+    if sys.platform == "darwin":
+        output = output_dir / f"Bilingual-Footnotes-{version}-macOS-{arguments.architecture}.dmg"
+        create_macos_dmg(app, output)
+    else:
+        output = (
+            output_dir / f"Bilingual-Footnotes-Setup-{version}-Windows-{arguments.architecture}.exe"
+        )
+        create_windows_installer(app, icon, output, version)
     write_checksum(output)
     print(output)
 

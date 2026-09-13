@@ -6,11 +6,9 @@ import argparse
 import hashlib
 import struct
 import tomllib
-import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-APP_NAME = "Bilingual Footnotes"
 
 
 def project_version() -> str:
@@ -19,80 +17,69 @@ def project_version() -> str:
         return str(tomllib.load(source)["project"]["version"])
 
 
-def expected_archives(version: str) -> dict[str, tuple[dict[str, str], str]]:
-    mac_members = {
-        "application": f"{APP_NAME}.app/Contents/MacOS/{APP_NAME}",
-        "worker": (f"{APP_NAME}.app/Contents/Resources/semantic-worker/bilingual-align-worker"),
-        "license": (f"{APP_NAME}.app/Contents/Resources/licenses/Bilingual-Footnotes-MIT.txt"),
-    }
-    windows_members = {
-        "application": f"{APP_NAME}/{APP_NAME}.exe",
-        "worker": f"{APP_NAME}/semantic-worker/bilingual-align-worker.exe",
-        "license": f"{APP_NAME}/licenses/Bilingual-Footnotes-MIT.txt",
-    }
+def expected_assets(version: str) -> dict[str, str]:
     return {
-        f"Bilingual-Footnotes-{version}-macOS-arm64.zip": (mac_members, "arm64"),
-        f"Bilingual-Footnotes-{version}-macOS-x86_64.zip": (mac_members, "x86_64"),
-        f"Bilingual-Footnotes-{version}-Windows-x86_64.zip": (windows_members, "windows-x86_64"),
+        f"Bilingual-Footnotes-{version}-macOS-arm64.dmg": "dmg",
+        f"Bilingual-Footnotes-{version}-macOS-x86_64.dmg": "dmg",
+        f"Bilingual-Footnotes-Setup-{version}-Windows-x86_64.exe": "windows-installer",
     }
 
 
-def validate_checksum(archive: Path) -> None:
-    checksum = archive.with_suffix(archive.suffix + ".sha256")
-    expected = f"{hashlib.sha256(archive.read_bytes()).hexdigest()}  {archive.name}\n".encode()
+def validate_checksum(asset: Path) -> None:
+    checksum = asset.with_suffix(asset.suffix + ".sha256")
+    with asset.open("rb") as source:
+        digest = hashlib.file_digest(source, "sha256").hexdigest()
+    expected = f"{digest}  {asset.name}\n".encode()
     if checksum.read_bytes() != expected:
         raise RuntimeError(f"invalid or non-portable checksum: {checksum.name}")
 
 
-def executable_architecture(data: bytes) -> str:
-    if data.startswith(b"\xcf\xfa\xed\xfe"):
-        cpu_type = struct.unpack_from("<I", data, 4)[0]
-        architectures = {0x01000007: "x86_64", 0x0100000C: "arm64"}
-        if cpu_type in architectures:
-            return architectures[cpu_type]
-    if data.startswith(b"MZ") and len(data) >= 0x40:
-        pe_offset = struct.unpack_from("<I", data, 0x3C)[0]
-        if data[pe_offset : pe_offset + 4] == b"PE\0\0":
-            machine = struct.unpack_from("<H", data, pe_offset + 4)[0]
-            if machine == 0x8664:
-                return "windows-x86_64"
-    raise RuntimeError("unrecognized executable architecture")
+def validate_dmg(asset: Path) -> None:
+    if asset.stat().st_size < 512:
+        raise RuntimeError(f"invalid UDIF disk image: {asset.name}")
+    with asset.open("rb") as source:
+        source.seek(-512, 2)
+        trailer = source.read(512)
+    if not trailer.startswith(b"koly"):
+        raise RuntimeError(f"invalid UDIF disk image: {asset.name}")
 
 
-def validate_archive(
-    archive: Path, required_members: dict[str, str], expected_architecture: str
-) -> None:
-    validate_checksum(archive)
-    with zipfile.ZipFile(archive) as package:
-        if corrupt := package.testzip():
-            raise RuntimeError(f"corrupt ZIP member in {archive.name}: {corrupt}")
-        missing = set(required_members.values()).difference(package.namelist())
-        if missing:
-            raise RuntimeError(f"missing from {archive.name}: {', '.join(sorted(missing))}")
-        for kind in ("application", "worker"):
-            actual = executable_architecture(package.read(required_members[kind]))
-            if actual != expected_architecture:
-                raise RuntimeError(
-                    f"{archive.name} {kind} is {actual}, expected {expected_architecture}"
-                )
+def validate_windows_installer(asset: Path) -> None:
+    with asset.open("rb") as source:
+        header = source.read(0x40)
+        if header.startswith(b"MZ") and len(header) == 0x40:
+            pe_offset = struct.unpack_from("<I", header, 0x3C)[0]
+            source.seek(pe_offset)
+            if source.read(4) == b"PE\0\0":
+                return
+    raise RuntimeError(f"invalid Windows executable: {asset.name}")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("directory", type=Path)
     arguments = parser.parse_args()
-    expected = expected_archives(project_version())
-    archives = list(arguments.directory.rglob("*.zip"))
-    actual = {path.name for path in archives}
-    if len(actual) != len(archives):
-        raise SystemExit("duplicate release archive names")
+    expected = expected_assets(project_version())
+    assets = [
+        path
+        for path in arguments.directory.rglob("*")
+        if path.is_file() and path.suffix in {".dmg", ".exe"}
+    ]
+    actual = {path.name for path in assets}
+    if len(actual) != len(assets):
+        raise SystemExit("duplicate release asset names")
     if actual != set(expected):
         detail = ", ".join(sorted(actual)) or "none"
-        raise SystemExit(f"unexpected release archive set: {detail}")
-    paths = {path.name: path for path in archives}
-    for name, (members, architecture) in expected.items():
-        validate_archive(paths[name], members, architecture)
-        print(f"Validated {name}: {architecture}")
+        raise SystemExit(f"unexpected release asset set: {detail}")
+    paths = {path.name: path for path in assets}
+    for name, kind in expected.items():
+        asset = paths[name]
+        validate_checksum(asset)
+        if kind == "dmg":
+            validate_dmg(asset)
+        else:
+            validate_windows_installer(asset)
+        print(f"Validated {name}: {kind}")
 
 
 if __name__ == "__main__":
