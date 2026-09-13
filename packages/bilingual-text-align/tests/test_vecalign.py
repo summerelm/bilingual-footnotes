@@ -13,7 +13,12 @@ import pytest
 from bilingual_text_align.model import TextUnit
 from bilingual_text_align.resource_paths import MODEL_STORAGE_MARKER
 from bilingual_text_align.vecalign_labse import VecalignLabseAligner
-from bilingual_text_align.worker_transport import JsonLinesWorker
+from bilingual_text_align.worker_transport import JsonLinesWorker, _worker_creation_flags
+
+
+def test_worker_creation_flags_hide_only_the_windows_console() -> None:
+    assert _worker_creation_flags("win32") == 0x08000000
+    assert _worker_creation_flags("darwin") == 0
 
 
 class FakeTransport:
