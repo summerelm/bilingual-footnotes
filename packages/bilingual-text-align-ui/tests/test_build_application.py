@@ -247,9 +247,13 @@ def test_default_worker_path_respects_platform_and_environment() -> None:
 
 def test_frozen_app_resolves_its_embedded_worker() -> None:
     executable = Path("/Applications/Bilingual Footnotes.app/Contents/MacOS/Bilingual Footnotes")
-    assert bundled_worker_command(executable=executable, frozen=True) == (
+    assert bundled_worker_command(executable=executable, frozen=True, platform="darwin") == (
         "/Applications/Bilingual Footnotes.app/Contents/Resources/semantic-worker/"
         "bilingual-align-worker",
+    )
+    windows_executable = Path("C:/Program Files/Bilingual Footnotes/Bilingual Footnotes.exe")
+    assert bundled_worker_command(executable=windows_executable, frozen=True, platform="win32") == (
+        str(windows_executable.resolve().parent / "semantic-worker" / "bilingual-align-worker.exe"),
     )
     assert bundled_worker_command(executable=executable, frozen=False) is None
 

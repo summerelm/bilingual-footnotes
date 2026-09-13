@@ -23,12 +23,20 @@ def default_aligner_python(
 
 
 def bundled_worker_command(
-    *, executable: str | Path | None = None, frozen: bool | None = None
+    *,
+    executable: str | Path | None = None,
+    frozen: bool | None = None,
+    platform: str | None = None,
 ) -> tuple[str, ...] | None:
     """Return the worker embedded in a frozen desktop application, if present."""
     is_frozen = bool(getattr(sys, "frozen", False)) if frozen is None else frozen
     if not is_frozen:
         return None
     application = Path(sys.executable if executable is None else executable).resolve()
-    worker = application.parents[1] / "Resources" / "semantic-worker" / "bilingual-align-worker"
+    current_platform = sys.platform if platform is None else platform
+    if current_platform == "darwin":
+        worker = application.parents[1] / "Resources" / "semantic-worker" / "bilingual-align-worker"
+    else:
+        suffix = ".exe" if current_platform == "win32" else ""
+        worker = application.parent / "semantic-worker" / f"bilingual-align-worker{suffix}"
     return (str(worker),)

@@ -6,12 +6,15 @@ you want to read, a corresponding translation EPUB, and a new EPUB output
 path. Processing remains local and the UI never overwrites an input or existing
 output.
 
-## Run the macOS app
+## Run the desktop app
 
-Download the macOS archive from the release, move **Bilingual Footnotes.app**
-to Applications, and open it. No CLI or separate Python installation is
-needed. Open **Model & storage…** and install the model on first use, then
-choose the reading EPUB, translation EPUB, and a new output filename.
+Download the Windows x64, macOS Apple Silicon, or macOS Intel archive from the
+[latest release](https://github.com/summerelm/bilingual-footnotes/releases/latest).
+Extract it and open **Bilingual Footnotes**. No CLI or separate Python
+installation is needed. Open **Model & storage…** and install the model on first
+use, then choose the reading EPUB, translation EPUB, and a new output filename.
+These builds are not code-signed or notarized, so your operating system may ask
+you to confirm before opening them.
 
 ## Run from Python
 

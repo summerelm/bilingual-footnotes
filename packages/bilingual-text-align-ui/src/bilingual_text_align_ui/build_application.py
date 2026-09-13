@@ -72,7 +72,7 @@ def run_epub_build(
     if aligner is None:
         if not semantic_model_installed(request.model_storage):
             raise RuntimeError(
-                "The semantic model is not installed. Open Storage and install it before "
+                "The semantic model is not installed. Open Model & storage and install it before "
                 "creating an EPUB."
             )
         options: dict[str, object] = {

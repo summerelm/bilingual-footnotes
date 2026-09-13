@@ -19,7 +19,7 @@ lock:
 	$(UV) lock --check
 
 sync:
-	$(UV) sync --locked --all-packages --all-groups
+	$(UV) sync --locked --all-packages --no-default-groups --group dev
 
 lint:
 	$(UV) run --locked ruff check --config $(TOOL_CONFIG) .

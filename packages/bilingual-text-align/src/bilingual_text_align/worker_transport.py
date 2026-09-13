@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import queue
 import subprocess
+import sys
 import threading
 from collections import deque
 from collections.abc import Mapping, Sequence
@@ -41,6 +42,12 @@ class ProcessFactory(Protocol):
     def __call__(self, command: Sequence[str]) -> WorkerProcess: ...
 
 
+def _worker_creation_flags(platform: str = sys.platform) -> int:
+    """Keep the bundled Windows worker from opening a second console window."""
+
+    return 0x08000000 if platform == "win32" else 0
+
+
 def _open_process(command: Sequence[str]) -> WorkerProcess:
     return subprocess.Popen(
         command,
@@ -49,6 +56,7 @@ def _open_process(command: Sequence[str]) -> WorkerProcess:
         stderr=subprocess.PIPE,
         text=True,
         encoding="utf-8",
+        creationflags=_worker_creation_flags(),
     )
 
 

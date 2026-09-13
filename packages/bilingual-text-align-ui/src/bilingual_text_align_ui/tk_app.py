@@ -73,7 +73,7 @@ def build_parser() -> argparse.ArgumentParser:
             "corresponding translation, and a new output path; processing stays local."
         ),
         epilog=(
-            "The packaged macOS app includes its semantic worker. Use Model & storage\n"
+            "The packaged desktop app includes its semantic worker. Use Model & storage\n"
             "inside the app to install or verify the model."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,

@@ -1,4 +1,4 @@
-.PHONY: architecture bootstrap build check journey lock sync test test-seams
+.PHONY: architecture bootstrap build check desktop journey lock sync test test-seams
 
 ALIGNMENT_PACKAGE := packages/bilingual-text-align
 EPUB_PACKAGE := packages/epub-bilingual-footnotes
@@ -10,7 +10,7 @@ bootstrap: sync
 	git config --local core.hooksPath .githooks
 
 sync:
-	$(UV) sync --locked --all-packages --all-groups
+	$(UV) sync --locked --all-packages --no-default-groups --group dev
 
 check: lock
 	$(MAKE) -C $(ALIGNMENT_PACKAGE) lint type coverage
@@ -40,3 +40,7 @@ build:
 	$(MAKE) -C $(ALIGNMENT_PACKAGE) build
 	$(MAKE) -C $(EPUB_PACKAGE) build-self
 	$(MAKE) -C $(UI_PACKAGE) build-self
+
+desktop:
+	$(UV) sync --python 3.12 --locked --all-packages --no-default-groups --group desktop-build
+	$(UV) run --python 3.12 --locked --no-default-groups --group desktop-build python tools/release/build_desktop.py --architecture $$(uname -m)
