@@ -1,0 +1,59 @@
+[build-system]
+requires = ["uv_build>=0.8.22,<0.9"]
+build-backend = "uv_build"
+
+[project]
+name = "bilingual-text-align-ui"
+version = "0.1.0"
+description = "Small cross-platform desktop frontend for bilingual EPUB footnotes"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{name = "summerelm"}]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: MacOS X",
+    "Environment :: Win32 (MS Windows)",
+    "Environment :: X11 Applications",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Typing :: Typed",
+]
+dependencies = [
+    "bilingual-text-align>=0.1,<0.2",
+    "epub-bilingual-footnotes>=0.1,<0.2",
+]
+
+[project.scripts]
+bilingual-align-ui = "bilingual_text_align_ui.tk_app:main"
+
+[tool.uv.sources]
+bilingual-text-align = {workspace = true}
+epub-bilingual-footnotes = {workspace = true}
+
+[tool.pytest.ini_options]
+addopts = "-q"
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source_pkgs = ["bilingual_text_align_ui"]
+omit = [
+    "src/bilingual_text_align_ui/__main__.py",
+    "src/bilingual_text_align_ui/epub_window.py",
+    "src/bilingual_text_align_ui/storage_window.py",
+    "src/bilingual_text_align_ui/tk_app.py",
+    "src/bilingual_text_align_ui/theme.py",
+]
+
+[tool.coverage.report]
+fail_under = 95
+precision = 2
+show_missing = true
+skip_empty = true

@@ -1,0 +1,3 @@
+{"case_id":"dialogue-split","first":["Bonjour.","Qui êtes-vous ?","Je suis le renard."],"second":["Hello.","Who are you? I am the fox."],"gold":[[[0],[0]],[[1,2],[1]]],"tags":["dialogue","merge"],"license":"CC0-1.0"}
+{"case_id":"omission","first":["Il entra.","Il sourit."],"second":["He entered."],"gold":[[[0],[0]],[[1],[]]],"tags":["deletion"],"license":"CC0-1.0"}
+

@@ -1,0 +1,51 @@
+# Operating-system files
+.DS_Store
+Thumbs.db
+
+# Python bytecode and interpreter caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments and local runtimes
+.venv*/
+venv/
+env/
+ENV/
+
+# Dependency and tool caches
+.uv-cache/
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.import_linter_cache/
+.tox/
+.nox/
+
+# Test and coverage output
+.coverage
+.coverage.*
+coverage.xml
+coverage.json
+htmlcov/
+junit*.xml
+test-results/
+
+# Package and build output
+build/
+dist/
+site/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+wheelhouse/
+*.whl
+
+# Temporary files and logs
+*.log
+*.tmp
+*.temp
+*.swp
+*~

@@ -1,0 +1,84 @@
+[importlinter]
+root_packages =
+    bilingual_text_align
+    epub_bilingual_footnotes
+    bilingual_text_align_ui
+
+[importlinter:contract:package-direction]
+name = Backend never imports EPUB application
+type = forbidden
+source_modules =
+    bilingual_text_align
+forbidden_modules =
+    epub_bilingual_footnotes
+
+[importlinter:contract:backend-ui-direction]
+name = Alignment backend never imports desktop UI
+type = forbidden
+source_modules =
+    bilingual_text_align
+forbidden_modules =
+    bilingual_text_align_ui
+
+[importlinter:contract:epub-ui-direction]
+name = EPUB application never imports desktop UI
+type = forbidden
+source_modules =
+    epub_bilingual_footnotes
+forbidden_modules =
+    bilingual_text_align_ui
+
+[importlinter:contract:backend-layers]
+name = Backend dependencies follow the approved graph
+type = layers
+layers =
+    bilingual_text_align.cli | bilingual_text_align.resources_cli | bilingual_text_align.setup_worker | bilingual_text_align.worker
+    bilingual_text_align.application
+    bilingual_text_align.plain_text | bilingual_text_align.vecalign_labse | bilingual_text_align.progress | bilingual_text_align.resources
+    bilingual_text_align.worker_transport | bilingual_text_align.semantic_runtime
+    bilingual_text_align.model_management
+    bilingual_text_align.embedding_worker | bilingual_text_align.npy_embedding_cache | bilingual_text_align.resource_storage
+    bilingual_text_align.embedding_cache
+    bilingual_text_align.resource_paths | bilingual_text_align.service | bilingual_text_align.segmentation | bilingual_text_align.containment | bilingual_text_align.boundary_reconciliation
+    bilingual_text_align.protocol
+    bilingual_text_align.model
+
+[importlinter:contract:plain-text-independent]
+name = Plain text does not know concrete semantic infrastructure
+type = forbidden
+source_modules =
+    bilingual_text_align.plain_text
+forbidden_modules =
+    bilingual_text_align.vecalign_labse
+    bilingual_text_align.worker
+    bilingual_text_align.setup_worker
+
+[importlinter:contract:semantic-cache-boundary]
+name = Semantic computation does not know the filesystem cache adapter
+type = forbidden
+source_modules =
+    bilingual_text_align.embedding_worker
+forbidden_modules =
+    bilingual_text_align.npy_embedding_cache
+
+[importlinter:contract:epub-layers]
+name = EPUB dependencies follow the approved graph
+type = layers
+layers =
+    epub_bilingual_footnotes.cli
+    epub_bilingual_footnotes.pipeline
+    epub_bilingual_footnotes.service
+    epub_bilingual_footnotes.rendering | epub_bilingual_footnotes.verification | epub_bilingual_footnotes.artifacts
+    epub_bilingual_footnotes.extraction | epub_bilingual_footnotes.protocol
+    epub_bilingual_footnotes.model
+
+[importlinter:contract:ui-layers]
+name = Desktop UI dependencies flow toward its application service
+type = layers
+layers =
+    bilingual_text_align_ui.__main__
+    bilingual_text_align_ui.tk_app
+    bilingual_text_align_ui.epub_window
+    bilingual_text_align_ui.storage_window
+    bilingual_text_align_ui.theme | bilingual_text_align_ui.build_application | bilingual_text_align_ui.resource_application
+    bilingual_text_align_ui.configuration

@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+make check
+git diff --cached --check
+

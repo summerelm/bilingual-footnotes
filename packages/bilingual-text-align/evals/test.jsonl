@@ -1,0 +1,2 @@
+{"case_id":"many-to-many","first":["Un.","Deux.","Trois."],"second":["One two.","Three."],"gold":[[[0,1],[0]],[[2],[1]]],"tags":["merge"],"license":"CC0-1.0"}
+

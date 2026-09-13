@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "model": "sentence-transformers/LaBSE",
+  "model_revision": "836121a0533e5664b21c7aacc5d22951f2b8b25b",
+  "alignment_max_size": 2,
+  "first_sha256": "3f302e0bd564150073b22814caa61ac53df18b877767310e4ff88e945933c61e",
+  "second_sha256": "b42c86bffa7b942bca4b3edb262cbd034542fc179fdea3120a71bdd6d1b1ece0",
+  "files": {
+    "1fb2cee768439073f0bcb5b685ae8e6fcdf71aed92c150d1c8342b3279a4acc6.npy": "7db0f259a377224503e4c915aa93f181327a55e874428765c82830d81fcdb7b9",
+    "b1c40b5db2b5a36b20085b461c9e08fcf287542d47b28bd9671386accb9f08c7.npy": "ed2f19799cd122e4e1a845cd79a4932dfd0ac33b1a7857e0ef8c7e16ece4285b",
+    "ec923c238067e936692060c17fdeebb56edea3a9379d82a5d369edeff03930b5.npy": "eb8e1da528cb345d28f2692e0db8db5655df8360dc17c80af8e1b460ed64665c",
+    "eebb254c81b6add77505d5ae3b41db53ca88726f71747fe6600504f5bcdada4f.npy": "aa96d17264cc3f6df16226c430bee168f6411f645e2fdda8b54e438436f7b99a"
+  }
+}
