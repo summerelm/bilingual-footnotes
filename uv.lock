@@ -64,7 +64,7 @@ source = { editable = "packages/bilingual-text-align" }
 
 [[package]]
 name = "bilingual-text-align-ui"
-version = "0.1.0"
+version = "0.1.1"
 source = { editable = "packages/bilingual-text-align-ui" }
 dependencies = [
     { name = "bilingual-text-align" },

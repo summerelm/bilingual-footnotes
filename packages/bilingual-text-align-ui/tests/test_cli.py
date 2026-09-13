@@ -20,4 +20,4 @@ def test_desktop_cli_reports_package_version(capsys: pytest.CaptureFixture[str])
     with pytest.raises(SystemExit) as exc:
         build_parser().parse_args(["--version"])
     assert exc.value.code == 0
-    assert capsys.readouterr().out == "bilingual-align-ui 0.1.0\n"
+    assert capsys.readouterr().out == "bilingual-align-ui 0.1.1\n"
