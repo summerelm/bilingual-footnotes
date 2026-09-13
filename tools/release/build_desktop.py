@@ -187,9 +187,8 @@ def archive(app: Path, output: Path) -> None:
 
 def write_checksum(path: Path) -> None:
     digest = hashlib.sha256(path.read_bytes()).hexdigest()
-    path.with_suffix(path.suffix + ".sha256").write_text(
-        f"{digest}  {path.name}\n", encoding="ascii"
-    )
+    line = f"{digest}  {path.name}\n".encode("ascii")
+    path.with_suffix(path.suffix + ".sha256").write_bytes(line)
 
 
 def main() -> None:
