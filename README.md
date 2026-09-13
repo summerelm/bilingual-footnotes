@@ -15,11 +15,19 @@ Both workflows require corresponding texts in the same reading order.
 
 ## Use the desktop app
 
-For the simplest macOS workflow, download the macOS archive from the release,
-move **Bilingual Footnotes.app** to Applications, and open it. Choose the EPUB
-you want to read, its translation, and a new output filename. The app includes
-the alignment worker; use **Model & storage…** to install the required model or
-clear reusable book embeddings.
+For the simplest workflow, download the archive for your computer from the
+[latest release](https://github.com/summerelm/bilingual-footnotes/releases/latest):
+
+- **Windows x64:** extract the archive and open `Bilingual Footnotes.exe`.
+- **Mac with Apple silicon:** extract the `macOS-arm64` archive, move
+  **Bilingual Footnotes.app** to Applications, and open it.
+- **Mac with an Intel processor:** use the `macOS-x86_64` archive instead.
+
+Choose the EPUB you want to read, its translation, and a new output filename.
+The app includes the alignment worker; use **Model & storage…** to install the
+required model or clear reusable book embeddings. These builds are not
+code-signed or notarized, so your operating system may ask you to confirm before
+opening them.
 
 The source books stay unchanged. Open the resulting EPUB in your usual reader;
 supported readers show the translations as popup footnotes, while others offer
