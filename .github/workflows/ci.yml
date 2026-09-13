@@ -2,6 +2,8 @@ name: CI
 
 on:
   push:
+    branches:
+      - main
   pull_request:
   workflow_dispatch:
 
@@ -61,3 +63,50 @@ jobs:
 
       - name: Run compatibility tests
         run: make test
+
+  journey:
+    name: Alice EPUB journey
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      UV_PYTHON: "3.12"
+      BILINGUAL_FOOTNOTES_TEST_WORKER_PYTHON: ${{ github.workspace }}/.venv-journey/bin/python
+      BILINGUAL_FOOTNOTES_TEST_MODEL_STORAGE: ${{ github.workspace }}/.journey/model
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.1.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install Python
+        run: uv python install 3.12
+
+      - name: Install test environment
+        run: make sync
+
+      - name: Install semantic worker environment
+        env:
+          UV_PROJECT_ENVIRONMENT: .venv-journey
+        run: uv sync --python 3.12 --locked --all-packages --no-default-groups --group desktop-build
+
+      - name: Restore pinned semantic model
+        id: model-cache
+        uses: actions/cache@v6.1.0
+        with:
+          path: .journey/model
+          key: labse-836121a0533e5664b21c7aacc5d22951f2b8b25b-v1
+
+      - name: Install pinned semantic model
+        if: steps.model-cache.outputs.cache-hit != 'true'
+        run: uv run --locked bilingual-align-resources model install --aligner-python .venv-journey/bin/python --model-storage .journey/model
+
+      - name: Verify cached semantic model
+        if: steps.model-cache.outputs.cache-hit == 'true'
+        run: uv run --locked bilingual-align-resources model verify --aligner-python .venv-journey/bin/python --model-storage .journey/model
+
+      - name: Run end-to-end Alice journeys
+        run: make journey
