@@ -8,11 +8,12 @@ output.
 
 ## Run the desktop app
 
-Download the Windows x64, macOS Apple Silicon, or macOS Intel archive from the
+Download the Windows x64 installer, macOS Apple Silicon DMG, or macOS Intel DMG from the
 [latest release](https://github.com/summerelm/bilingual-footnotes/releases/latest).
-Extract it and open **Bilingual Footnotes**. No CLI or separate Python
-installation is needed. Open **Model & storage…** and install the model on first
-use, then choose the reading EPUB, translation EPUB, and a new output filename.
+On Windows, run the installer. On macOS, open the DMG and drag **Bilingual
+Footnotes** to Applications. No CLI or separate Python installation is needed.
+Open **Model & storage…** and install the model on first use, then choose the
+reading EPUB, translation EPUB, and a new output filename.
 These builds are not code-signed or notarized, so your operating system may ask
 you to confirm before opening them.
 
