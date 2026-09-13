@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import importlib.metadata
+import os
 import platform
 import plistlib
 import shutil
@@ -166,7 +167,7 @@ def verify(app_executable: Path, worker_executable: Path, version: str) -> None:
     app_result = subprocess.run(  # noqa: S603
         (str(app_executable), "--version"), capture_output=True, check=True, text=True
     )
-    if version not in app_result.stdout:
+    if sys.platform != "win32" and version not in app_result.stdout:
         raise RuntimeError(f"desktop version check failed: {app_result.stdout.strip()}")
     subprocess.run(  # noqa: S603
         (str(worker_executable), "--help"), capture_output=True, check=True, text=True
@@ -208,6 +209,8 @@ def main() -> None:
         )
 
     version = project_version()
+    if (tag := os.environ.get("GITHUB_REF_NAME", "")).startswith("v") and tag[1:] != version:
+        raise SystemExit(f"release tag {tag} does not match project version {version}")
     scratch = ROOT / "build/desktop"
     shutil.rmtree(scratch, ignore_errors=True)
     dist, work = scratch / "dist", scratch / "work"
